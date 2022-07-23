@@ -88,20 +88,21 @@ local function mouseMoved()
     if Target then
         if Target.Parent:IsA("Accessory") and checkForPlayer(Target.Parent.Parent) then
             setText(Target.Parent.Parent.Name)
-            
+            SavedTarget = Target.Parent.Parent.HumanoidRootPart
             TargetSelected = true
             TargetRoot = Target.Parent.Parent.HumanoidRootPart
             Label.Visible = true
             
         elseif Target.Parent:IsA("Tool") and checkForPlayer(Target.Parent.Parent) then
             setText(Target.Parent.Parent.Name)
-            
+            SavedTarget = Target.Parent.Parent.HumanoidRootPart
             TargetSelected = true
             TargetRoot = Target.Parent.Parent.HumanoidRootPart
             Label.Visible = true
             
         elseif checkForPlayer(Target.Parent) then
             setText(Target.Parent.Name)
+            SavedTarget = Target.Parent.HumanoidRootPart
             TargetSelected = true
             TargetRoot = Target.Parent.HumanoidRootPart
             Label.Visible = true
@@ -121,6 +122,7 @@ end
 
 local function Clicked()
     if TargetSelected and TargetRoot then
+        SavedTarget = TargetRoot
         Player.Character.HumanoidRootPart.CFrame = TargetRoot.CFrame * CFrame.new(0,0,-3) 
         notify("Teleported to: "..TargetRoot.Parent.Name)
     end    
@@ -128,6 +130,7 @@ end
 
 local function OpenMenu()
     if TargetSelected and TargetRoot then
+        SavedTarget = TargetRoot
         notify("Opening menu")
         
         for i, v in pairs(game:GetService("CoreGui"):GetChildren()) do
@@ -218,7 +221,7 @@ local function OpenMenu()
         end
         --// make buttons and script
         makebtn("Goto", function()
-        	print("Hello world!")
+            Player.Character.HumanoidRootPart.CFrame = SavedTarget.CFrame * CFrame.new(0,0,-3) 
         	HighMoonMenu:Destroy()
         end)
         
