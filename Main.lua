@@ -226,7 +226,58 @@ local function OpenMenu()
         end)
         
         makebtn("Bring", function()
-        	print("Hello world!")
+            --// why did u have to leak this shown, lol
+            local plr = game.Players.LocalPlayer
+            local backpack = plr.Backpack
+            local character = plr.Character
+            local hrp = character.HumanoidRootPart
+
+            local tool = character:FindFirstChildOfClass("Tool") or backpack:FindFirstChildOfClass("Tool")
+            if #game.Players.LocalPlayer.Backpack:GetChildren() < 2 and workspace:FindFirstChild("Handle") then	
+                firetouchinterest(game:GetService("Workspace").Handle,hrp,0)
+                firetouchinterest(game:GetService("Workspace").Handle,hrp,1)
+                character.ChildAdded:wait()
+                task.wait()
+            end
+            for i,v in pairs(character:GetChildren()) do
+                if v:IsA("Tool") then
+                    v.Parent = backpack
+                    v.Parent = character
+                    v.Parent = backpack
+                end
+            end
+
+            local attachtool
+            for i,v in pairs(backpack:GetChildren()) do
+                if v:IsA("Tool") and v ~= tool then
+                    attachtool = v
+                    break
+                end
+            end
+            tool.Parent = backpack
+
+            attachtool.Parent = character
+            attachtool.Parent = tool
+            attachtool.Parent = backpack
+            attachtool.Parent = character.Head
+
+            local rarm = character:FindFirstChild("Right Arm") or character:FindFirstChild("RightHand")
+            local rgrip = Instance.new("Weld")
+            rgrip.Name = "RightGrip"
+            rgrip.Part0 = rarm
+            rgrip.Part1 = attachtool.Handle
+            rgrip.C0 = CFrame.new(0, 1, -5) * CFrame.Angles(math.rad(0),0,0)
+            rgrip.C1 = attachtool.Grip
+            rgrip.Parent = rarm
+
+            wait()
+
+            firetouchinterest(attachtool.Handle, SavedTarget,0)
+            firetouchinterest(attachtool.Handle, SavedTarget,1)
+
+            wait(0.5)
+            
+            game:GetService("Players").LocalPlayer.Character['Right Arm'].RightGrip:Destroy()
         	HighMoonMenu:Destroy()
         end)
         

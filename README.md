@@ -15,3 +15,4 @@ loadstring(game:HttpGet("https://raw.githubusercontent.com/specowos/MoonHigh/mai
 ## Credits
 - #### Ches made basically everything before i could; the teleport func, player detection func and more.
 - #### Me, (spec) made the ui and the idea originally for both the select label and the menu. I'm also working on the menu functions but ches will prob do most of the work lmao.
+- #### Shownape, made the tool attach method and we good friends so i thought i would credit him.
