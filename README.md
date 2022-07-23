@@ -11,3 +11,7 @@ loadstring(game:HttpGet("https://raw.githubusercontent.com/specowos/MoonHigh/mai
 
 ## Showcase
 [![IMAGE ALT TEXT](https://raw.githubusercontent.com/specowos/MoonHigh/main/Media/previewthumbnail.png)](https://www.youtube.com/watch?v=JDD3YX_w7tg "Preview")
+
+## Credits
+- #### Hats made basically everything before i could; the teleport func, player detection func and more.
+- #### Me, (spec) made the ui and the idea originally for both the select label and the menu. I'm also working on the menu functions but hats will prob do most of the work lmao.
