@@ -266,7 +266,7 @@ local function OpenMenu()
             rgrip.Name = "RightGrip"
             rgrip.Part0 = rarm
             rgrip.Part1 = attachtool.Handle
-            rgrip.C0 = CFrame.new(0, 1, -5) * CFrame.Angles(math.rad(0),0,0)
+            rgrip.C0 = CFrame.new(0, 3, -5) * CFrame.Angles(math.rad(0),0,0)
             rgrip.C1 = attachtool.Grip
             rgrip.Parent = rarm
 
