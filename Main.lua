@@ -1,6 +1,5 @@
-if game.CoreGui:FindFirstChild("MoonHighRoot") then
-    game.CoreGui:FindFirstChild("MoonHighRoot"):Destroy()
-end
+ver = "build: alpha v0.00d"
+messages = {"random message lol - rawr!","random message lol - uwu","random message lol - owo", "random message lol - >w<", "random message lol - okie"}
 
 local function notify(text)
     wait()
@@ -38,7 +37,12 @@ local function notify(text)
     end)
 end
 
-notify("MoonHigh reloaded!")
+if game.CoreGui:FindFirstChild("MoonHighRoot") then
+    game.CoreGui:FindFirstChild("MoonHighRoot"):Destroy()
+    notify("MoonHigh reloaded! | "..ver.." | "..messages[math.random(1,#messages)])
+else
+    notify("MoonHigh loaded! | "..ver.." | "..messages[math.random(1,#messages)])
+end
 
 local MoonHighRoot = Instance.new("ScreenGui")
 local Label = Instance.new("TextLabel")
@@ -137,6 +141,7 @@ local function Clicked()
     end    
 end
 
+--// menu func
 local function OpenMenu()
     if TargetSelected and TargetRoot then
         SavedTarget = TargetRoot
@@ -179,7 +184,7 @@ local function OpenMenu()
         Name.Size = UDim2.new(1, 0, 0, 25)
         Name.ZIndex = 0
         Name.Font = Enum.Font.RobotoMono
-        Name.Text = "Player cmds"
+        Name.Text = SavedTarget.Parent.Name
         Name.TextColor3 = Color3.fromRGB(136, 132, 217)
         Name.TextSize = 14.000
         
@@ -225,6 +230,7 @@ local function OpenMenu()
         	btn.Text = text
         	btn.TextColor3 = Color3.fromRGB(136, 132, 217)
         	btn.TextSize = 14.000
+            btn.Modal = true
         	
         	func = func or function() end
         	btn.MouseButton1Click:connect(function()
@@ -361,12 +367,63 @@ local function OpenMenu()
 
             firetouchinterest(attachtool.Handle, SavedTarget,0)
             firetouchinterest(attachtool.Handle, SavedTarget,1)
-            
+
         	closemenu()
         end)
         
         makebtn("Fling", function()
-        	print("Hello world!")
+            --// using very modified iy method
+            --~ this took WAYY longer than it should have to make
+            local target = SavedTarget.Parent
+            local me = game.Players.LocalPlayer.Character
+
+            for i, v in pairs(me:GetChildren()) do
+                if v:IsA("Tool") then
+                    v.Parent = game.Players.LocalPlayer.Backpack
+                end
+            end
+
+            local bodyvel = Instance.new("BodyAngularVelocity")
+            bodyvel.MaxTorque = Vector3.new(1, 1, 1) * math.huge
+            bodyvel.P = math.huge
+            bodyvel.AngularVelocity = Vector3.new(0, 9e5, 0)
+            bodyvel.Parent = me.HumanoidRootPart
+
+            for i, v in next, me:GetChildren() do
+                if v:IsA("BasePart") then
+                    v.CanCollide = false
+                    v.Massless = true
+                    v.Velocity = Vector3.new(0, 0, 0)
+                end
+            end
+
+            local function stopthisfunc()
+                for i, v in next, me:GetChildren() do
+                    if v:IsA("BasePart") then
+                        v.CanCollide = false
+                    end
+                end
+            end
+
+            stopconnection = game.RunService.Stepped:Connect(stopthisfunc)
+
+            local savedpos = me.HumanoidRootPart.CFrame
+
+            local function endthemfunc()
+                function endthem()
+                    me.HumanoidRootPart.CFrame = target.HumanoidRootPart.CFrame - Vector3.new(-0.5, 0, 0)
+                end
+                connection = game.RunService.Heartbeat:Connect(endthem)
+                wait(2)
+                connection:Disconnect()
+            end
+
+            endthemfunc()
+            stopconnection:Disconnect()
+
+            bodyvel:Destroy()
+
+            me.HumanoidRootPart.CFrame = savedpos
         	closemenu()
         end)
         
