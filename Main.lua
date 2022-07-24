@@ -67,6 +67,15 @@ local Mouse = Player:GetMouse()
 local TargetSelected = false
 local TargetRoot = nil
 
+local function isr6()
+    local hum = game:GetService("Players").LocalPlayer.Character:FindFirstChild("Humanoid")
+    if hum.RigType == Enum.HumanoidRigType.R6 then
+        return true
+    else
+        return false
+    end
+end
+
 local function checkForPlayer(Part)
     if Players:GetPlayerFromCharacter(Part) then
         return true
@@ -133,12 +142,15 @@ local function OpenMenu()
         SavedTarget = TargetRoot
         notify("Opening menu")
         
-        for i, v in pairs(game:GetService("CoreGui"):GetChildren()) do
-            if v.Name == "HighMoonMenu" then
-                v:Destroy()
+        local function closemenu()
+            for i, v in pairs(game:GetService("CoreGui"):GetChildren()) do
+                if v.Name == "HighMoonMenu" then
+                    v:Destroy()
+                end
             end
         end
-        
+        closemenu()
+
         --// make menu
         local HighMoonMenu = Instance.new("ScreenGui")
         local Menu = Instance.new("Frame")
@@ -223,7 +235,7 @@ local function OpenMenu()
         makebtn("Goto", function()
             Player.Character.HumanoidRootPart.CFrame = SavedTarget.CFrame * CFrame.new(0,0,-3) 
             notify("Teleported to: "..SavedTarget.Parent.Name)
-        	HighMoonMenu:Destroy()
+        	closemenu()
         end)
         
         makebtn("Bring", function()
@@ -284,29 +296,88 @@ local function OpenMenu()
             firetouchinterest(attachtool.Handle, SavedTarget,1)
 
             wait(0.5)
-            
-            game:GetService("Players").LocalPlayer.Character['Right Arm'].RightGrip:Destroy()
-        	HighMoonMenu:Destroy()
+
+            if isr6() then
+                game:GetService("Players").LocalPlayer.Character['Right Arm'].RightGrip:Destroy()
+            else
+                game:GetService("Players").LocalPlayer.Character['RightHand'].RightGrip:Destroy()
+            end
+        	closemenu()
         end)
         
         makebtn("Attach", function()
-        	print("Hello world!")
-        	HighMoonMenu:Destroy()
+            if #game.Players.LocalPlayer.Backpack:GetChildren() <= 1 and not workspace:FindFirstChild("Handle") then	
+                notify("Not enough tools!")
+                return nil
+            end
+
+            notify("Bringing to: "..SavedTarget.Parent.Name)
+
+            --// why did u have to leak this shown, lol
+            local plr = game.Players.LocalPlayer
+            local backpack = plr.Backpack
+            local character = plr.Character
+            local hrp = character.HumanoidRootPart
+
+            local tool = character:FindFirstChildOfClass("Tool") or backpack:FindFirstChildOfClass("Tool")
+            if #game.Players.LocalPlayer.Backpack:GetChildren() < 2 and workspace:FindFirstChild("Handle") then	
+                firetouchinterest(game:GetService("Workspace").Handle,hrp,0)
+                firetouchinterest(game:GetService("Workspace").Handle,hrp,1)
+                character.ChildAdded:wait()
+                task.wait()
+            end
+            for i,v in pairs(character:GetChildren()) do
+                if v:IsA("Tool") then
+                    v.Parent = backpack
+                    v.Parent = character
+                    v.Parent = backpack
+                end
+            end
+
+            local attachtool
+            for i,v in pairs(backpack:GetChildren()) do
+                if v:IsA("Tool") and v ~= tool then
+                    attachtool = v
+                    break
+                end
+            end
+            tool.Parent = backpack
+
+            attachtool.Parent = character
+            attachtool.Parent = tool
+            attachtool.Parent = backpack
+            attachtool.Parent = character.Head
+
+            local rarm = character:FindFirstChild("Right Arm") or character:FindFirstChild("RightHand")
+            local rgrip = Instance.new("Weld")
+            rgrip.Name = "RightGrip"
+            rgrip.Part0 = rarm
+            rgrip.Part1 = attachtool.Handle
+            rgrip.C0 = CFrame.new(0, -1, 0) * CFrame.Angles(math.rad(-90),0,0)
+            rgrip.C1 = attachtool.Grip
+            rgrip.Parent = rarm
+
+            wait()
+
+            firetouchinterest(attachtool.Handle, SavedTarget,0)
+            firetouchinterest(attachtool.Handle, SavedTarget,1)
+            
+        	closemenu()
         end)
         
         makebtn("Fling", function()
         	print("Hello world!")
-        	HighMoonMenu:Destroy()
+        	closemenu()
         end)
         
         makebtn("Kill", function()
         	print("Hello world!")
-        	HighMoonMenu:Destroy()
+        	closemenu()
         end)
 
         makebtn("Close", function()
         	notify("Closing menu")
-        	HighMoonMenu:Destroy()
+        	closemenu()
         end)
     end    
 end
