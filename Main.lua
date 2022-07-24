@@ -222,10 +222,18 @@ local function OpenMenu()
         --// make buttons and script
         makebtn("Goto", function()
             Player.Character.HumanoidRootPart.CFrame = SavedTarget.CFrame * CFrame.new(0,0,-3) 
+            notify("Teleported to: "..SavedTarget.Parent.Name)
         	HighMoonMenu:Destroy()
         end)
         
         makebtn("Bring", function()
+            if #game.Players.LocalPlayer.Backpack:GetChildren() <= 1 and not workspace:FindFirstChild("Handle") then	
+                notify("Not enough tools!")
+                return nil
+            end
+
+            notify("Bringing to: "..SavedTarget.Parent.Name)
+
             --// why did u have to leak this shown, lol
             local plr = game.Players.LocalPlayer
             local backpack = plr.Backpack
@@ -295,7 +303,11 @@ local function OpenMenu()
         	print("Hello world!")
         	HighMoonMenu:Destroy()
         end)
-        
+
+        makebtn("Close", function()
+        	notify("Closing menu")
+        	HighMoonMenu:Destroy()
+        end)
     end    
 end
 
