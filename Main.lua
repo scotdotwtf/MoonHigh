@@ -374,6 +374,8 @@ local function OpenMenu()
         makebtn("Fling", function()
             --// using very modified iy method
             --~ this took WAYY longer than it should have to make
+            notify("Fling'n: "..SavedTarget.Parent.Name)
+
             local target = SavedTarget.Parent
             local me = game.Players.LocalPlayer.Character
 
@@ -407,8 +409,6 @@ local function OpenMenu()
 
             stopconnection = game.RunService.Stepped:Connect(stopthisfunc)
 
-            local savedpos = me.HumanoidRootPart.CFrame
-
             local function endthemfunc()
                 function endthem()
                     me.HumanoidRootPart.CFrame = target.HumanoidRootPart.CFrame - Vector3.new(-0.5, 0, 0)
@@ -423,7 +423,8 @@ local function OpenMenu()
 
             bodyvel:Destroy()
 
-            me.HumanoidRootPart.CFrame = savedpos
+            me.Humanoid.Health = 0
+
         	closemenu()
         end)
         
