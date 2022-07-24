@@ -372,59 +372,60 @@ local function OpenMenu()
         end)
         
         makebtn("Fling", function()
-            --// using very modified iy method
-            --~ this took WAYY longer than it should have to make
-            notify("Fling'n: "..SavedTarget.Parent.Name)
+            spawn(function()
+                --// using very modified iy method
+                --~ this took WAYY longer than it should have to make
+                notify("Fling'n: "..SavedTarget.Parent.Name)
 
-            local target = SavedTarget.Parent
-            local me = game.Players.LocalPlayer.Character
+                local target = SavedTarget.Parent
+                local me = game.Players.LocalPlayer.Character
 
-            for i, v in pairs(me:GetChildren()) do
-                if v:IsA("Tool") then
-                    v.Parent = game.Players.LocalPlayer.Backpack
+                for i, v in pairs(me:GetChildren()) do
+                    if v:IsA("Tool") then
+                        v.Parent = game.Players.LocalPlayer.Backpack
+                    end
                 end
-            end
 
-            local bodyvel = Instance.new("BodyAngularVelocity")
-            bodyvel.MaxTorque = Vector3.new(1, 1, 1) * math.huge
-            bodyvel.P = math.huge
-            bodyvel.AngularVelocity = Vector3.new(0, 9e5, 0)
-            bodyvel.Parent = me.HumanoidRootPart
+                local bodyvel = Instance.new("BodyAngularVelocity")
+                bodyvel.MaxTorque = Vector3.new(1, 1, 1) * math.huge
+                bodyvel.P = math.huge
+                bodyvel.AngularVelocity = Vector3.new(0, 9e5, 0)
+                bodyvel.Parent = me.HumanoidRootPart
 
-            for i, v in next, me:GetChildren() do
-                if v:IsA("BasePart") then
-                    v.CanCollide = false
-                    v.Massless = true
-                    v.Velocity = Vector3.new(0, 0, 0)
-                end
-            end
-
-            local function stopthisfunc()
                 for i, v in next, me:GetChildren() do
                     if v:IsA("BasePart") then
                         v.CanCollide = false
+                        v.Massless = true
+                        v.Velocity = Vector3.new(0, 0, 0)
                     end
                 end
-            end
 
-            stopconnection = game.RunService.Stepped:Connect(stopthisfunc)
-
-            local function endthemfunc()
-                function endthem()
-                    me.HumanoidRootPart.CFrame = target.HumanoidRootPart.CFrame - Vector3.new(-0.5, 0, 0)
+                local function stopthisfunc()
+                    for i, v in next, me:GetChildren() do
+                        if v:IsA("BasePart") then
+                            v.CanCollide = false
+                        end
+                    end
                 end
-                connection = game.RunService.Heartbeat:Connect(endthem)
-                wait(2)
-                connection:Disconnect()
-            end
 
-            endthemfunc()
-            stopconnection:Disconnect()
+                stopconnection = game.RunService.Stepped:Connect(stopthisfunc)
 
-            bodyvel:Destroy()
+                local function endthemfunc()
+                    function endthem()
+                        me.HumanoidRootPart.CFrame = target.HumanoidRootPart.CFrame - Vector3.new(-0.5, 0, 0)
+                    end
+                    connection = game.RunService.Heartbeat:Connect(endthem)
+                    wait(2)
+                    connection:Disconnect()
+                end
 
-            me.Humanoid.Health = 0
+                endthemfunc()
+                stopconnection:Disconnect()
 
+                bodyvel:Destroy()
+
+                me.Humanoid.Health = 0
+            end)
         	closemenu()
         end)
         
