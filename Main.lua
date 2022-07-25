@@ -201,7 +201,7 @@ local function OpenMenu()
         holder.Selectable = false
         holder.Size = UDim2.new(1, 0, 1, -25)
         holder.ZIndex = -5
-        holder.CanvasSize = UDim2.new(0, 0, 1.6, 0)
+        holder.CanvasSize = UDim2.new(0, 0, 1.7, 0)
         holder.ScrollBarThickness = 0
         
         list.Name = "list"
@@ -518,6 +518,79 @@ local function OpenMenu()
 
             local track = game.Players.LocalPlayer.Character.Humanoid:LoadAnimation(anim)
             track:Play(.1, 1, 1)
+
+        	closemenu()
+        end)
+
+        makebtn("Hold", function()
+            if #game.Players.LocalPlayer.Backpack:GetChildren() <= 1 and not workspace:FindFirstChild("Handle") then	
+                notify("Not enough tools!")
+                return nil
+            end
+
+            notify("You're now holding: "..SavedTarget.Parent.Name)
+
+            --// why did u have to leak this shown, lol
+            local plr = game.Players.LocalPlayer
+            local backpack = plr.Backpack
+            local character = plr.Character
+            local hrp = character.HumanoidRootPart
+
+            local tool = character:FindFirstChildOfClass("Tool") or backpack:FindFirstChildOfClass("Tool")
+            if #game.Players.LocalPlayer.Backpack:GetChildren() < 2 and workspace:FindFirstChild("Handle") then	
+                firetouchinterest(game:GetService("Workspace").Handle,hrp,0)
+                firetouchinterest(game:GetService("Workspace").Handle,hrp,1)
+                character.ChildAdded:wait()
+                task.wait()
+            end
+            for i,v in pairs(character:GetChildren()) do
+                if v:IsA("Tool") then
+                    v.Parent = backpack
+                    v.Parent = character
+                    v.Parent = backpack
+                end
+            end
+
+            local attachtool
+            for i,v in pairs(backpack:GetChildren()) do
+                if v:IsA("Tool") and v ~= tool then
+                    attachtool = v
+                    break
+                end
+            end
+            tool.Parent = backpack
+
+            attachtool.Parent = character
+            attachtool.Parent = tool
+            attachtool.Parent = backpack
+            attachtool.Parent = character.Head
+
+            local rarm = character:FindFirstChild("Right Arm") or character:FindFirstChild("RightHand")
+            local rgrip = Instance.new("Weld")
+            rgrip.Name = "RightGrip"
+            rgrip.Part0 = rarm
+            rgrip.Part1 = attachtool.Handle
+            rgrip.C0 = CFrame.new(1.5, -3, -0.5) * CFrame.Angles(math.rad(-90),0,0)
+            rgrip.C1 = attachtool.Grip
+            rgrip.Parent = rarm
+
+            firetouchinterest(attachtool.Handle, SavedTarget,0)
+            firetouchinterest(attachtool.Handle, SavedTarget,1)
+
+            wait(0.1)
+
+            SavedTarget.Parent.Humanoid.PlatformStand = true
+
+            local anim = Instance.new("Animation")
+
+            if isr6() then
+                anim.AnimationId = "rbxassetid://182393478"
+            else
+                anim.AnimationId = "rbxassetid://507768375"
+            end
+            
+            local track = game.Players.LocalPlayer.Character.Humanoid:LoadAnimation(anim)
+            track:Play(.1, 1, 5)
 
         	closemenu()
         end)
