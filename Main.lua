@@ -1,10 +1,12 @@
+--// unimportant vars
+ver = "build: alpha v0.01 rewrite"
+messages = {"random message lol - rawr!","random message lol - uwu","random message lol - owo", "random message lol - >w<", "random message lol - okie"}
+
 --// Wait for game to load if someone is using autoexc
 repeat wait() until game:IsLoaded()
 
-ver = "build: alpha v0.00d"
-messages = {"random message lol - rawr!","random message lol - uwu","random message lol - owo", "random message lol - >w<", "random message lol - okie"}
-
-local function notify(text)
+--// notify func
+local function Notify(text)
     wait()
     for i, v in pairs(game:GetService("CoreGui"):GetChildren()) do
         if v.Name == "MoonHighNotif" then
@@ -31,7 +33,7 @@ local function notify(text)
     Notif.TextColor3 = Color3.fromRGB(136, 132, 217)
     Notif.TextSize = 14.000
     
-    spawn(function()
+    pcall(function()
         Notif:TweenPosition(UDim2.new(0, 0, 0, 0),"Out","Quint",.3)
         wait(0.5)
         Notif:TweenPosition(UDim2.new(0, 0, 0, -100),"In","Quint",.3)
@@ -40,15 +42,20 @@ local function notify(text)
     end)
 end
 
-if game.CoreGui:FindFirstChild("MoonHighRoot") then
+--// check if it already exist
+if game:GetService("CoreGui"):FindFirstChild("MoonHighRoot") then
     game.CoreGui:FindFirstChild("MoonHighRoot"):Destroy()
-    notify("MoonHigh reloaded! | "..ver.." | "..messages[math.random(1,#messages)])
+    Notify("MoonHigh reloaded! | "..ver.." | "..messages[math.random(1,#messages)])
 else
-    notify("MoonHigh loaded! | "..ver.." | "..messages[math.random(1,#messages)])
+    Notify("MoonHigh loaded! | "..ver.." | "..messages[math.random(1,#messages)])
 end
 
+--// make ui
 local MoonHighRoot = Instance.new("ScreenGui")
 local Label = Instance.new("TextLabel")
+local Stroke = Instance.new("UIStroke")
+local Rounding = Instance.new("UICorner")
+
 MoonHighRoot.Name = "MoonHighRoot"
 MoonHighRoot.Parent = game.CoreGui
 MoonHighRoot.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
@@ -58,31 +65,29 @@ Label.Parent = MoonHighRoot
 Label.BackgroundColor3 = Color3.fromRGB(14, 12, 29)
 Label.BorderColor3 = Color3.fromRGB(82, 79, 130)
 Label.BackgroundTransparency = 0.25
-Label.TextColor3 = Color3.fromRGB(82, 79, 130)
+Label.TextColor3 = Color3.fromRGB(136, 132, 217)
 Label.Font = Enum.Font.RobotoMono
 Label.TextSize = 14
 Label.Text = "selected: none"
 Label.Size = UDim2.new(0, Label.TextBounds.X + 14, 0, 22)
 Label.Position = UDim2.new(0, 25, 0, 25)
+Label.Visible = false
 
+Stroke.Parent = Label
+Stroke.Color = Color3.fromRGB(82, 79, 130)
+Stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
+Rounding.Parent = Label
+Rounding.CornerRadius = UDim.new(0, 6)
+
+--// useful vars
 local Players = game:GetService("Players")
 local Player = Players.LocalPlayer
-
 local Mouse = Player:GetMouse()
-
 local TargetSelected = false
 local TargetRoot = nil
 
-local function isr6()
-    local hum = game:GetService("Players").LocalPlayer.Character:FindFirstChild("Humanoid")
-    if hum.RigType == Enum.HumanoidRigType.R6 then
-        return true
-    else
-        return false
-    end
-end
-
+--// cursor follow func
 local function checkForPlayer(Part)
     if Players:GetPlayerFromCharacter(Part) then
         return true
@@ -108,14 +113,12 @@ local function mouseMoved()
             TargetSelected = true
             TargetRoot = Target.Parent.Parent.HumanoidRootPart
             Label.Visible = true
-            
         elseif Target.Parent:IsA("Tool") and checkForPlayer(Target.Parent.Parent) then
             setText(Target.Parent.Parent.Name)
             SavedTarget = Target.Parent.Parent.HumanoidRootPart
             TargetSelected = true
             TargetRoot = Target.Parent.Parent.HumanoidRootPart
             Label.Visible = true
-            
         elseif checkForPlayer(Target.Parent) then
             setText(Target.Parent.Name)
             SavedTarget = Target.Parent.HumanoidRootPart
@@ -133,51 +136,62 @@ local function mouseMoved()
         TargetSelected = false
         TargetRoot = nil
         Label.Visible = false
-    end  
+    end
 end
 
+--// left click func
 local function Clicked()
     if TargetSelected and TargetRoot then
         SavedTarget = TargetRoot
         Player.Character.HumanoidRootPart.CFrame = TargetRoot.CFrame * CFrame.new(0,0,-3) 
-        notify("Teleported to: "..TargetRoot.Parent.Name)
+        Notify("Teleported to: "..TargetRoot.Parent.Name)
     end    
 end
 
---// menu func
 local function OpenMenu()
     if TargetSelected and TargetRoot then
+        --// Saved vars
         SavedTarget = TargetRoot
-        notify("Opening menu")
-        
-        local function closemenu()
+
+        --// Useful funcs
+        local function CheckR6()
+            local hum = game:GetService("Players").LocalPlayer.Character:FindFirstChild("Humanoid")
+            if hum.RigType == Enum.HumanoidRigType.R6 then
+                return true
+            else
+                return false
+            end
+        end
+
+        local function DestroyMenus()
             for i, v in pairs(game:GetService("CoreGui"):GetChildren()) do
                 if v.Name == "HighMoonMenu" then
                     v:Destroy()
                 end
             end
         end
-        closemenu()
 
-        --// make menu
+        DestroyMenus()
+
+        --// Make menu
         local HighMoonMenu = Instance.new("ScreenGui")
         local Menu = Instance.new("Frame")
+        local MStroke = Instance.new("UIStroke")
+        local MRounding = Instance.new("UICorner")
         local Name = Instance.new("TextLabel")
-        local holder = Instance.new("ScrollingFrame")
-        local list = Instance.new("UIListLayout")
-        local pad = Instance.new("UIPadding")
-        
-        --// define menu
+        local Scroll = Instance.new("ScrollingFrame")
+        local List = Instance.new("UIListLayout")
+        local Pad = Instance.new("UIPadding")
+
         HighMoonMenu.Name = "HighMoonMenu"
-        HighMoonMenu.Parent = game.CoreGui
-        
+        HighMoonMenu.Parent = game:GetService("CoreGui")
+
         Menu.Name = "Menu"
         Menu.Parent = HighMoonMenu
         Menu.BackgroundColor3 = Color3.fromRGB(14, 12, 29)
-        Menu.BackgroundTransparency = 0.250
-        Menu.BorderColor3 = Color3.fromRGB(82, 79, 130)
-        Menu.Position = UDim2.new(0.5, -97, 0.5, -73)
-        Menu.Size = UDim2.new(0, 195, 0, 147)
+        Menu.BackgroundTransparency = 0.25
+        Menu.Position = UDim2.new(0.5, -97, 0.5, -72)
+        Menu.Size = UDim2.new(0, 195, 0, 146)
         Menu.ZIndex = -5
         
         Name.Name = "Name"
@@ -190,70 +204,83 @@ local function OpenMenu()
         Name.Text = SavedTarget.Parent.Name
         Name.TextColor3 = Color3.fromRGB(136, 132, 217)
         Name.TextSize = 14.000
+
+        MStroke.Parent = Menu
+        MStroke.Color = Color3.fromRGB(82, 79, 130)
+
+        MRounding.Parent = Menu
+        MRounding.CornerRadius = UDim.new(0, 6)
+
+        Scroll.Name = "Scroll"
+        Scroll.Parent = Menu
+        Scroll.BackgroundTransparency = 1.000
+        Scroll.Position = UDim2.new(0, 0, 0, 25)
+        Scroll.Selectable = false
+        Scroll.Size = UDim2.new(1, 0, 1, -25)
+        Scroll.ZIndex = -5
+        Scroll.CanvasSize = UDim2.new(0, 0, 1.7, -5)
+        Scroll.ScrollBarThickness = 0
         
-        holder.Name = "holder"
-        holder.Parent = Menu
-        holder.BackgroundColor3 = Color3.fromRGB(14, 12, 29)
-        holder.BackgroundTransparency = 1.000
-        holder.BorderColor3 = Color3.fromRGB(82, 79, 130)
-        holder.BorderSizePixel = 0
-        holder.Position = UDim2.new(0, 0, 0, 25)
-        holder.Selectable = false
-        holder.Size = UDim2.new(1, 0, 1, -25)
-        holder.ZIndex = -5
-        holder.CanvasSize = UDim2.new(0, 0, 1.7, 0)
-        holder.ScrollBarThickness = 0
+        List.Name = "list"
+        List.Parent = Scroll
+        List.HorizontalAlignment = Enum.HorizontalAlignment.Center
+        List.Padding = UDim.new(0, 4)
         
-        list.Name = "list"
-        list.Parent = holder
-        list.HorizontalAlignment = Enum.HorizontalAlignment.Center
-        list.Padding = UDim.new(0, 4)
-        
-        pad.Name = "pad"
-        pad.Parent = holder
-        pad.PaddingTop = UDim.new(0, 1)
-        
-        local function makebtn(text, func)
-        	local btn = Instance.new("TextButton")
-        	
-        	for i, v in pairs(holder:GetChildren())	do
-        		btn.Name = i..text
-        	end
-        	
-        	btn.Parent = holder
-        	btn.Active = false
-        	btn.BackgroundColor3 = Color3.fromRGB(14, 12, 29)
-        	btn.BackgroundTransparency = 0.250
-        	btn.BorderColor3 = Color3.fromRGB(82, 79, 130)
-        	btn.Position = UDim2.new(0, 0, 0, 25)
-        	btn.Selectable = false
-        	btn.Size = UDim2.new(1, -10, 0, 20)
-        	btn.ZIndex = -5
-        	btn.Font = Enum.Font.RobotoMono
-        	btn.Text = text
-        	btn.TextColor3 = Color3.fromRGB(136, 132, 217)
-        	btn.TextSize = 14.000
-            btn.Modal = true
-        	
-        	func = func or function() end
-        	btn.MouseButton1Click:connect(function()
-    			spawn(func)
-    		end)
+        Pad.Name = "pad"
+        Pad.Parent = Scroll
+        Pad.PaddingTop = UDim.new(0, 1)
+
+        local function makebtn(Text, Func)
+            local Button = Instance.new("TextButton")
+            local MStroke = Instance.new("UIStroke")
+            local MRounding = Instance.new("UICorner")
+            
+            for i, v in pairs(Scroll:GetChildren())	do
+                Button.Name = i+10
+            end
+            
+            Button.Parent = Scroll
+            Button.Active = false
+            Button.BackgroundColor3 = Color3.fromRGB(14, 12, 29)
+            Button.BackgroundTransparency = 0.250
+            Button.Position = UDim2.new(0, 0, 0, 25)
+            Button.Selectable = false
+            Button.Size = UDim2.new(1, -10, 0, 20)
+            Button.ZIndex = -5
+            Button.Font = Enum.Font.RobotoMono
+            Button.Text = Text
+            Button.TextColor3 = Color3.fromRGB(136, 132, 217)
+            Button.TextSize = 14.000
+            Button.Modal = true
+            
+            MStroke.Parent = Button
+            MStroke.Color = Color3.fromRGB(82, 79, 130)
+            MStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+
+            MRounding.Parent = Button
+            MRounding.CornerRadius = UDim.new(0, 4)
+
+            Func = Func or function() end
+            Button.MouseButton1Click:connect(function()
+                spawn(Func)
+                DestroyMenus()
+            end)
         end
-        --// make buttons and script
-        makebtn("Goto", function()
-            Player.Character.HumanoidRootPart.CFrame = SavedTarget.CFrame * CFrame.new(0,0,-3) 
-            notify("Teleported to: "..SavedTarget.Parent.Name)
-        	closemenu()
-        end)
-        
-        makebtn("Bring", function()
+
+        --// This is where the rewrite really comes in, with these funcs
+        local function Stopanims()
+            --// Thanks IY!
+            local Hum = Player.Character:FindFirstChildOfClass("Humanoid") or Char:FindFirstChildOfClass("AnimationController")
+            for i,v in next, Hum:GetPlayingAnimationTracks() do
+                v:Stop()
+            end
+        end
+
+        local function GripToPos(Info)
             if #game.Players.LocalPlayer.Backpack:GetChildren() <= 1 and not workspace:FindFirstChild("Handle") then	
-                notify("Not enough tools!")
+                Notify("Not enough tools!")
                 return nil
             end
-
-            notify("Bringing to: "..SavedTarget.Parent.Name)
 
             --// why did u have to leak this shown, lol
             local plr = game.Players.LocalPlayer
@@ -295,382 +322,129 @@ local function OpenMenu()
             rgrip.Name = "RightGrip"
             rgrip.Part0 = rarm
             rgrip.Part1 = attachtool.Handle
-            rgrip.C0 = CFrame.new(0, 3, -5) * CFrame.Angles(math.rad(0),0,0)
+            rgrip.C0 = Info.ToCFrame
             rgrip.C1 = attachtool.Grip
             rgrip.Parent = rarm
 
             wait()
 
             SavedTarget.Parent.Humanoid.PlatformStand = true
+
+            --// anim system
+            if CheckR6() then
+                if Info.AnimR6 ~= "None" then
+                    local anim = Instance.new("Animation")
+
+                    if Info.AnimR6 == "Tool" then
+                        anim.AnimationId = "rbxassetid://182393478"
+                    else
+                        anim.AnimationId = Info.AnimR6
+                    end
+
+                    local track = game.Players.LocalPlayer.Character.Humanoid:LoadAnimation(anim)
+                    track:Play(.1, 1, 1)
+                end
+            else
+                if Info.AnimR15 ~= "None" then
+                    local anim = Instance.new("Animation")
+
+                    if Info.AnimR15 == "Tool" then
+                        anim.AnimationId = "rbxassetid://507768375"
+                    else
+                        anim.AnimationId = Info.AnimR15
+                    end
+
+                    local track = game.Players.LocalPlayer.Character.Humanoid:LoadAnimation(anim)
+                    track:Play(.1, 1, 1)
+                end
+            end
 
             firetouchinterest(attachtool.Handle, SavedTarget,0)
             firetouchinterest(attachtool.Handle, SavedTarget,1)
 
             wait(0.5)
 
-            if isr6() then
-                game:GetService("Players").LocalPlayer.Character['Right Arm'].RightGrip:Destroy()
-            else
-                game:GetService("Players").LocalPlayer.Character['RightHand'].RightGrip:Destroy()
+            if Info.Drop then
+                if CheckR6() then
+                    Player.Character['Right Arm'].RightGrip:Destroy()
+                else
+                    Player.Character['RightHand'].RightGrip:Destroy()
+                end
             end
-        	closemenu()
+        end
+
+        makebtn("Goto", function()
+            Player.Character.HumanoidRootPart.CFrame = SavedTarget.CFrame * CFrame.new(0,0,-3) 
+        	Notify("Teleporting to: "..SavedTarget.Parent.Name)
+        end)
+
+        makebtn("Bring", function()
+            game:GetService("Players").LocalPlayer.Character.Animate.Disabled = true
+            Stopanims()
+            GripToPos({
+                ["ToCFrame"] = CFrame.new(0, 3, -5) * CFrame.Angles(math.rad(0),0,0),
+                ["Drop"] = true,
+                ["AnimR6"] = "None",
+                ["AnimR15"] = "None"
+            })     
+        	Notify("Bringing: "..SavedTarget.Parent.Name)
+            game:GetService("Players").LocalPlayer.Character.Animate.Disabled = false
         end)
 
         makebtn("Skydive", function()
-            if #game.Players.LocalPlayer.Backpack:GetChildren() <= 1 and not workspace:FindFirstChild("Handle") then	
-                notify("Not enough tools!")
-                return nil
-            end
-
-            notify("Skydiving: "..SavedTarget.Parent.Name)
-
-            --// why did u have to leak this shown, lol
-            local plr = game.Players.LocalPlayer
-            local backpack = plr.Backpack
-            local character = plr.Character
-            local hrp = character.HumanoidRootPart
-            
-            local tool = character:FindFirstChildOfClass("Tool") or backpack:FindFirstChildOfClass("Tool")
-            if #game.Players.LocalPlayer.Backpack:GetChildren() < 2 and workspace:FindFirstChild("Handle") then	
-                firetouchinterest(game:GetService("Workspace").Handle,hrp,0)
-                firetouchinterest(game:GetService("Workspace").Handle,hrp,1)
-                character.ChildAdded:wait()
-                task.wait()
-            end
-            for i,v in pairs(character:GetChildren()) do
-                if v:IsA("Tool") then
-                    v.Parent = backpack
-                    v.Parent = character
-                    v.Parent = backpack
-                end
-            end
-            
-            local attachtool
-            for i,v in pairs(backpack:GetChildren()) do
-                if v:IsA("Tool") and v ~= tool then
-                    attachtool = v
-                    break
-                end
-            end
-            tool.Parent = backpack
-            
-            attachtool.Parent = character
-            attachtool.Parent = tool
-            attachtool.Parent = backpack
-            attachtool.Parent = character.Head
-            
-            local rarm = character:FindFirstChild("Right Arm") or character:FindFirstChild("RightHand")
-            local rgrip = Instance.new("Weld")
-            rgrip.Name = "RightGrip"
-            rgrip.Part0 = rarm
-            rgrip.Part1 = attachtool.Handle
-            rgrip.C0 = CFrame.new(0, 150, 0) * CFrame.Angles(math.rad(-180),0,0)
-            rgrip.C1 = attachtool.Grip
-            rgrip.Parent = rarm
-            
             game:GetService("Players").LocalPlayer.Character.Animate.Disabled = true
-            
-            SavedTarget.Parent.Humanoid.PlatformStand = true
-            
-            firetouchinterest(attachtool.Handle, SavedTarget,0)
-            firetouchinterest(attachtool.Handle, SavedTarget,1)
-            
-            wait(0.1)
-            
-            if isr6() then
-                game:GetService("Players").LocalPlayer.Character['Right Arm'].RightGrip:Destroy()
-            else
-                game:GetService("Players").LocalPlayer.Character['RightHand'].RightGrip:Destroy()
-            end
-            
+            Stopanims()
+            GripToPos({
+                ["ToCFrame"] = CFrame.new(0, 150, 0) * CFrame.Angles(math.rad(-180),0,0),
+                ["Drop"] = true,
+                ["AnimR6"] = "None",
+                ["AnimR15"] = "None"
+            })     
+        	Notify(SavedTarget.Parent.Name.." is skydiving")
             game:GetService("Players").LocalPlayer.Character.Animate.Disabled = false
-        	closemenu()
         end)
-        
+
         makebtn("Attach", function()
-            if #game.Players.LocalPlayer.Backpack:GetChildren() <= 1 and not workspace:FindFirstChild("Handle") then	
-                notify("Not enough tools!")
-                return nil
-            end
-
-            notify("Attached to: "..SavedTarget.Parent.Name)
-
-            --// why did u have to leak this shown, lol
-            local plr = game.Players.LocalPlayer
-            local backpack = plr.Backpack
-            local character = plr.Character
-            local hrp = character.HumanoidRootPart
-
-            local tool = character:FindFirstChildOfClass("Tool") or backpack:FindFirstChildOfClass("Tool")
-            if #game.Players.LocalPlayer.Backpack:GetChildren() < 2 and workspace:FindFirstChild("Handle") then	
-                firetouchinterest(game:GetService("Workspace").Handle,hrp,0)
-                firetouchinterest(game:GetService("Workspace").Handle,hrp,1)
-                character.ChildAdded:wait()
-                task.wait()
-            end
-            for i,v in pairs(character:GetChildren()) do
-                if v:IsA("Tool") then
-                    v.Parent = backpack
-                    v.Parent = character
-                    v.Parent = backpack
-                end
-            end
-
-            local attachtool
-            for i,v in pairs(backpack:GetChildren()) do
-                if v:IsA("Tool") and v ~= tool then
-                    attachtool = v
-                    break
-                end
-            end
-            tool.Parent = backpack
-
-            attachtool.Parent = character
-            attachtool.Parent = tool
-            attachtool.Parent = backpack
-            attachtool.Parent = character.Head
-
-            local rarm = character:FindFirstChild("Right Arm") or character:FindFirstChild("RightHand")
-            local rgrip = Instance.new("Weld")
-            rgrip.Name = "RightGrip"
-            rgrip.Part0 = rarm
-            rgrip.Part1 = attachtool.Handle
-            rgrip.C0 = CFrame.new(0, -1, 0) * CFrame.Angles(math.rad(-90),0,0)
-            rgrip.C1 = attachtool.Grip
-            rgrip.Parent = rarm
-
-            wait()
-
-            SavedTarget.Parent.Humanoid.PlatformStand = true
-
-            firetouchinterest(attachtool.Handle, SavedTarget,0)
-            firetouchinterest(attachtool.Handle, SavedTarget,1)
-
-        	closemenu()
+            GripToPos({
+                ["ToCFrame"] = CFrame.new(0, -1, 0) * CFrame.Angles(math.rad(-90),0,0),
+                ["Drop"] = false,
+                ["AnimR6"] = "None",
+                ["AnimR15"] = "None"
+            })     
+        	Notify("Attaching: "..SavedTarget.Parent.Name)
         end)
 
         makebtn("Bodyguard", function()
-            if #game.Players.LocalPlayer.Backpack:GetChildren() <= 1 and not workspace:FindFirstChild("Handle") then	
-                notify("Not enough tools!")
-                return nil
-            end
-
-            notify(SavedTarget.Parent.Name.." is now your bodyguard!")
-
-            --// why did u have to leak this shown, lol
-            local plr = game.Players.LocalPlayer
-            local backpack = plr.Backpack
-            local character = plr.Character
-            local hrp = character.HumanoidRootPart
-
-            local tool = character:FindFirstChildOfClass("Tool") or backpack:FindFirstChildOfClass("Tool")
-            if #game.Players.LocalPlayer.Backpack:GetChildren() < 2 and workspace:FindFirstChild("Handle") then	
-                firetouchinterest(game:GetService("Workspace").Handle,hrp,0)
-                firetouchinterest(game:GetService("Workspace").Handle,hrp,1)
-                character.ChildAdded:wait()
-                task.wait()
-            end
-            for i,v in pairs(character:GetChildren()) do
-                if v:IsA("Tool") then
-                    v.Parent = backpack
-                    v.Parent = character
-                    v.Parent = backpack
-                end
-            end
-
-            local attachtool
-            for i,v in pairs(backpack:GetChildren()) do
-                if v:IsA("Tool") and v ~= tool then
-                    attachtool = v
-                    break
-                end
-            end
-            tool.Parent = backpack
-
-            attachtool.Parent = character
-            attachtool.Parent = tool
-            attachtool.Parent = backpack
-            attachtool.Parent = character.Head
-
-            local rarm = character:FindFirstChild("Right Arm") or character:FindFirstChild("RightHand")
-            local rgrip = Instance.new("Weld")
-            rgrip.Name = "RightGrip"
-            rgrip.Part0 = rarm
-            rgrip.Part1 = attachtool.Handle
-            rgrip.C0 = CFrame.new(6, -1, 0) * CFrame.Angles(math.rad(-90),0,0)
-            rgrip.C1 = attachtool.Grip
-            rgrip.Parent = rarm
-
-            firetouchinterest(attachtool.Handle, SavedTarget,0)
-            firetouchinterest(attachtool.Handle, SavedTarget,1)
-
-            wait(0.1)
-
-            SavedTarget.Parent.Humanoid.PlatformStand = true
-
-            local anim = Instance.new("Animation")
-
-            if isr6() then
-                anim.AnimationId = "rbxassetid://182393478"
-            else
-                anim.AnimationId = "rbxassetid://507768375"
-            end
-
-            local track = game.Players.LocalPlayer.Character.Humanoid:LoadAnimation(anim)
-            track:Play(.1, 1, 1)
-
-        	closemenu()
+            GripToPos({
+                ["ToCFrame"] = CFrame.new(6, -1, 0) * CFrame.Angles(math.rad(-90),0,0),
+                ["Drop"] = false,
+                ["AnimR6"] = "Tool",
+                ["AnimR15"] = "Tool"
+            })     
+        	Notify(SavedTarget.Parent.Name.." is your bodyguard")
         end)
 
         makebtn("Hold", function()
-            if #game.Players.LocalPlayer.Backpack:GetChildren() <= 1 and not workspace:FindFirstChild("Handle") then	
-                notify("Not enough tools!")
-                return nil
-            end
-
-            notify("You're now holding: "..SavedTarget.Parent.Name)
-
-            --// why did u have to leak this shown, lol
-            local plr = game.Players.LocalPlayer
-            local backpack = plr.Backpack
-            local character = plr.Character
-            local hrp = character.HumanoidRootPart
-
-            local tool = character:FindFirstChildOfClass("Tool") or backpack:FindFirstChildOfClass("Tool")
-            if #game.Players.LocalPlayer.Backpack:GetChildren() < 2 and workspace:FindFirstChild("Handle") then	
-                firetouchinterest(game:GetService("Workspace").Handle,hrp,0)
-                firetouchinterest(game:GetService("Workspace").Handle,hrp,1)
-                character.ChildAdded:wait()
-                task.wait()
-            end
-            for i,v in pairs(character:GetChildren()) do
-                if v:IsA("Tool") then
-                    v.Parent = backpack
-                    v.Parent = character
-                    v.Parent = backpack
-                end
-            end
-
-            local attachtool
-            for i,v in pairs(backpack:GetChildren()) do
-                if v:IsA("Tool") and v ~= tool then
-                    attachtool = v
-                    break
-                end
-            end
-            tool.Parent = backpack
-
-            attachtool.Parent = character
-            attachtool.Parent = tool
-            attachtool.Parent = backpack
-            attachtool.Parent = character.Head
-
-            local rarm = character:FindFirstChild("Right Arm") or character:FindFirstChild("RightHand")
-            local rgrip = Instance.new("Weld")
-            rgrip.Name = "RightGrip"
-            rgrip.Part0 = rarm
-            rgrip.Part1 = attachtool.Handle
-            rgrip.C0 = CFrame.new(1.5, -3, -0.5) * CFrame.Angles(math.rad(-90),0,0)
-            rgrip.C1 = attachtool.Grip
-            rgrip.Parent = rarm
-
-            firetouchinterest(attachtool.Handle, SavedTarget,0)
-            firetouchinterest(attachtool.Handle, SavedTarget,1)
-
-            wait(0.1)
-
-            SavedTarget.Parent.Humanoid.PlatformStand = true
-
-            local anim = Instance.new("Animation")
-
-            if isr6() then
-                anim.AnimationId = "rbxassetid://182393478"
-            else
-                anim.AnimationId = "rbxassetid://507768375"
-            end
-            
-            local track = game.Players.LocalPlayer.Character.Humanoid:LoadAnimation(anim)
-            track:Play(.1, 1, 5)
-
-        	closemenu()
+            GripToPos({
+                ["ToCFrame"] = CFrame.new(1.5, -3, -0.5) * CFrame.Angles(math.rad(-90),0,0),
+                ["Drop"] = false,
+                ["AnimR6"] = "Tool",
+                ["AnimR15"] = "Tool"
+            })     
+        	Notify("Holding: "..SavedTarget.Parent.Name)
         end)
 
         makebtn("Bang", function()
-            if #game.Players.LocalPlayer.Backpack:GetChildren() <= 1 and not workspace:FindFirstChild("Handle") then	
-                notify("Not enough tools!")
-                return nil
-            end
-
-            notify("Bang'd: "..SavedTarget.Parent.Name)
-
-            --// why did u have to leak this shown, lol
-            local plr = game.Players.LocalPlayer
-            local backpack = plr.Backpack
-            local character = plr.Character
-            local hrp = character.HumanoidRootPart
-
-            local tool = character:FindFirstChildOfClass("Tool") or backpack:FindFirstChildOfClass("Tool")
-            if #game.Players.LocalPlayer.Backpack:GetChildren() < 2 and workspace:FindFirstChild("Handle") then	
-                firetouchinterest(game:GetService("Workspace").Handle,hrp,0)
-                firetouchinterest(game:GetService("Workspace").Handle,hrp,1)
-                character.ChildAdded:wait()
-                task.wait()
-            end
-            for i,v in pairs(character:GetChildren()) do
-                if v:IsA("Tool") then
-                    v.Parent = backpack
-                    v.Parent = character
-                    v.Parent = backpack
-                end
-            end
-
-            local attachtool
-            for i,v in pairs(backpack:GetChildren()) do
-                if v:IsA("Tool") and v ~= tool then
-                    attachtool = v
-                    break
-                end
-            end
-            tool.Parent = backpack
-
-            attachtool.Parent = character
-            attachtool.Parent = tool
-            attachtool.Parent = backpack
-            attachtool.Parent = character.Head
-
-            local rarm = character:FindFirstChild("Right Arm") or character:FindFirstChild("RightHand")
-            local rgrip = Instance.new("Weld")
-            rgrip.Name = "RightGrip"
-            rgrip.Part0 = rarm
-            rgrip.Part1 = attachtool.Handle
-            rgrip.C0 = CFrame.new(0, 2.5, 2.5) * CFrame.Angles(math.rad(125),0,0)
-            rgrip.C1 = attachtool.Grip
-            rgrip.Parent = rarm
-
-            wait()
-
-            SavedTarget.Parent.Humanoid.PlatformStand = true
-
-            local anim = Instance.new("Animation")
-            
-            if isr6() then
-                anim.AnimationId = "rbxassetid://148840371"
-            else
-                wait(1)
-                notify("r15 anims not supported :(")
-            end
-
-            local track = game.Players.LocalPlayer.Character.Humanoid:LoadAnimation(anim)
-            track:Play(.1, 1, 5)
-
-            firetouchinterest(attachtool.Handle, SavedTarget,0)
-            firetouchinterest(attachtool.Handle, SavedTarget,1)
-
-        	closemenu()
+            GripToPos({
+                ["ToCFrame"] = CFrame.new(0, 2.5, 2.5) * CFrame.Angles(math.rad(125),0,0),
+                ["Drop"] = false,
+                ["AnimR6"] = "rbxassetid://148840371",
+                ["AnimR15"] = "rbxassetid://5918726674"
+            })     
+        	Notify("Bang'n: "..SavedTarget.Parent.Name)
         end)
-        
+
         makebtn("Fling", function()
-            notify("Fling'n: "..SavedTarget.Parent.Name)
             spawn(function()
                 --// using very modified iy method
                 --~ this took WAYY longer than it should have to make
@@ -723,86 +497,26 @@ local function OpenMenu()
 
                 me.Humanoid.Health = 0
             end)
-        	closemenu()
+            Notify("Fling'n: "..SavedTarget.Parent.Name)
         end)
-        
-        makebtn("Kill", function()
-            if #game.Players.LocalPlayer.Backpack:GetChildren() <= 1 and not workspace:FindFirstChild("Handle") then	
-                notify("Not enough tools!")
-                return nil
-            end
-            
-        	notify("Killing player: "..SavedTarget.Parent.Name)
 
-            --// why did u have to leak this shown, lol
-            local plr = game.Players.LocalPlayer
-            local backpack = plr.Backpack
-            local character = plr.Character
-            local hrp = character.HumanoidRootPart
-            
-            local tool = character:FindFirstChildOfClass("Tool") or backpack:FindFirstChildOfClass("Tool")
-            if #game.Players.LocalPlayer.Backpack:GetChildren() < 2 and workspace:FindFirstChild("Handle") then	
-                firetouchinterest(game:GetService("Workspace").Handle,hrp,0)
-                firetouchinterest(game:GetService("Workspace").Handle,hrp,1)
-                character.ChildAdded:wait()
-                task.wait()
-            end
-            for i,v in pairs(character:GetChildren()) do
-                if v:IsA("Tool") then
-                    v.Parent = backpack
-                    v.Parent = character
-                    v.Parent = backpack
-                end
-            end
-            
-            local attachtool
-            for i,v in pairs(backpack:GetChildren()) do
-                if v:IsA("Tool") and v ~= tool then
-                    attachtool = v
-                    break
-                end
-            end
-            tool.Parent = backpack
-            
-            attachtool.Parent = character
-            attachtool.Parent = tool
-            attachtool.Parent = backpack
-            attachtool.Parent = character.Head
-            
-            local rarm = character:FindFirstChild("Right Arm") or character:FindFirstChild("RightHand")
-            local rgrip = Instance.new("Weld")
-            rgrip.Name = "RightGrip"
-            rgrip.Part0 = rarm
-            rgrip.Part1 = attachtool.Handle
-            rgrip.C0 = CFrame.new(0, -99, 0) * CFrame.Angles(math.rad(0),0,0)
-            rgrip.C1 = attachtool.Grip
-            rgrip.Parent = rarm
-            
-            wait()
-            
-            SavedTarget.Parent.Humanoid.PlatformStand = true
-            
-            firetouchinterest(attachtool.Handle, SavedTarget,0)
-            firetouchinterest(attachtool.Handle, SavedTarget,1)
-            
-            wait(0.1)
-            
-            if isr6() then
-                game:GetService("Players").LocalPlayer.Character['Right Arm'].RightGrip:Destroy()
-            else
-                game:GetService("Players").LocalPlayer.Character['RightHand'].RightGrip:Destroy()
-            end
-            
-        	closemenu()
+        makebtn("Kill", function()
+            GripToPos({
+                ["ToCFrame"] = CFrame.new(0, -99, 0) * CFrame.Angles(math.rad(0),0,0),
+                ["Drop"] = true,
+                ["AnimR6"] = "None",
+                ["AnimR15"] = "None"
+            })     
+        	Notify("Killing: "..SavedTarget.Parent.Name)
         end)
 
         makebtn("Close", function()
-        	notify("Closing menu")
-        	closemenu()
+            Notify("Closing menu")
         end)
-    end    
+    end
 end
 
+--// complete with mouse funcs
 Mouse.Move:Connect(mouseMoved)
 Mouse.Button1Down:Connect(Clicked)
 Mouse.Button2Down:Connect(OpenMenu)
