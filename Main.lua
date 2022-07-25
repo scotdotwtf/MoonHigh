@@ -1,3 +1,6 @@
+--// Wait for game to load if someone is using autoexc
+repeat wait() until game:IsLoaded()
+
 ver = "build: alpha v0.00d"
 messages = {"random message lol - rawr!","random message lol - uwu","random message lol - owo", "random message lol - >w<", "random message lol - okie"}
 
@@ -198,7 +201,7 @@ local function OpenMenu()
         holder.Selectable = false
         holder.Size = UDim2.new(1, 0, 1, -25)
         holder.ZIndex = -5
-        holder.CanvasSize = UDim2.new(0, 0, 1, 0)
+        holder.CanvasSize = UDim2.new(0, 0, 1.25, 0)
         holder.ScrollBarThickness = 0
         
         list.Name = "list"
@@ -310,6 +313,75 @@ local function OpenMenu()
             end
         	closemenu()
         end)
+
+        makebtn("Skydive", function()
+            if #game.Players.LocalPlayer.Backpack:GetChildren() <= 1 and not workspace:FindFirstChild("Handle") then	
+                notify("Not enough tools!")
+                return nil
+            end
+
+            notify("Skydiving: "..SavedTarget.Parent.Name)
+
+            --// why did u have to leak this shown, lol
+            local plr = game.Players.LocalPlayer
+            local backpack = plr.Backpack
+            local character = plr.Character
+            local hrp = character.HumanoidRootPart
+            
+            local tool = character:FindFirstChildOfClass("Tool") or backpack:FindFirstChildOfClass("Tool")
+            if #game.Players.LocalPlayer.Backpack:GetChildren() < 2 and workspace:FindFirstChild("Handle") then	
+                firetouchinterest(game:GetService("Workspace").Handle,hrp,0)
+                firetouchinterest(game:GetService("Workspace").Handle,hrp,1)
+                character.ChildAdded:wait()
+                task.wait()
+            end
+            for i,v in pairs(character:GetChildren()) do
+                if v:IsA("Tool") then
+                    v.Parent = backpack
+                    v.Parent = character
+                    v.Parent = backpack
+                end
+            end
+            
+            local attachtool
+            for i,v in pairs(backpack:GetChildren()) do
+                if v:IsA("Tool") and v ~= tool then
+                    attachtool = v
+                    break
+                end
+            end
+            tool.Parent = backpack
+            
+            attachtool.Parent = character
+            attachtool.Parent = tool
+            attachtool.Parent = backpack
+            attachtool.Parent = character.Head
+            
+            local rarm = character:FindFirstChild("Right Arm") or character:FindFirstChild("RightHand")
+            local rgrip = Instance.new("Weld")
+            rgrip.Name = "RightGrip"
+            rgrip.Part0 = rarm
+            rgrip.Part1 = attachtool.Handle
+            rgrip.C0 = CFrame.new(0, 150, 0) * CFrame.Angles(math.rad(-180),0,0)
+            rgrip.C1 = attachtool.Grip
+            rgrip.Parent = rarm
+            
+            game:GetService("Players").LocalPlayer.Character.Animate.Disabled = true
+            
+            firetouchinterest(attachtool.Handle, SavedTarget,0)
+            firetouchinterest(attachtool.Handle, SavedTarget,1)
+            
+            wait(0.1)
+            
+            if isr6() then
+                game:GetService("Players").LocalPlayer.Character['Right Arm'].RightGrip:Destroy()
+            else
+                game:GetService("Players").LocalPlayer.Character['RightHand'].RightGrip:Destroy()
+            end
+            
+            game:GetService("Players").LocalPlayer.Character.Animate.Disabled = false
+        	closemenu()
+        end)
         
         makebtn("Attach", function()
             if #game.Players.LocalPlayer.Backpack:GetChildren() <= 1 and not workspace:FindFirstChild("Handle") then	
@@ -317,7 +389,7 @@ local function OpenMenu()
                 return nil
             end
 
-            notify("Bringing to: "..SavedTarget.Parent.Name)
+            notify("Attached to: "..SavedTarget.Parent.Name)
 
             --// why did u have to leak this shown, lol
             local plr = game.Players.LocalPlayer
@@ -372,11 +444,10 @@ local function OpenMenu()
         end)
         
         makebtn("Fling", function()
+            notify("Fling'n: "..SavedTarget.Parent.Name)
             spawn(function()
                 --// using very modified iy method
                 --~ this took WAYY longer than it should have to make
-                notify("Fling'n: "..SavedTarget.Parent.Name)
-
                 local target = SavedTarget.Parent
                 local me = game.Players.LocalPlayer.Character
 
@@ -430,7 +501,70 @@ local function OpenMenu()
         end)
         
         makebtn("Kill", function()
-        	print("Hello world!")
+            if #game.Players.LocalPlayer.Backpack:GetChildren() <= 1 and not workspace:FindFirstChild("Handle") then	
+                notify("Not enough tools!")
+                return nil
+            end
+            
+        	notify("Killing player: "..SavedTarget.Parent.Name)
+
+            --// why did u have to leak this shown, lol
+            local plr = game.Players.LocalPlayer
+            local backpack = plr.Backpack
+            local character = plr.Character
+            local hrp = character.HumanoidRootPart
+            
+            local tool = character:FindFirstChildOfClass("Tool") or backpack:FindFirstChildOfClass("Tool")
+            if #game.Players.LocalPlayer.Backpack:GetChildren() < 2 and workspace:FindFirstChild("Handle") then	
+                firetouchinterest(game:GetService("Workspace").Handle,hrp,0)
+                firetouchinterest(game:GetService("Workspace").Handle,hrp,1)
+                character.ChildAdded:wait()
+                task.wait()
+            end
+            for i,v in pairs(character:GetChildren()) do
+                if v:IsA("Tool") then
+                    v.Parent = backpack
+                    v.Parent = character
+                    v.Parent = backpack
+                end
+            end
+            
+            local attachtool
+            for i,v in pairs(backpack:GetChildren()) do
+                if v:IsA("Tool") and v ~= tool then
+                    attachtool = v
+                    break
+                end
+            end
+            tool.Parent = backpack
+            
+            attachtool.Parent = character
+            attachtool.Parent = tool
+            attachtool.Parent = backpack
+            attachtool.Parent = character.Head
+            
+            local rarm = character:FindFirstChild("Right Arm") or character:FindFirstChild("RightHand")
+            local rgrip = Instance.new("Weld")
+            rgrip.Name = "RightGrip"
+            rgrip.Part0 = rarm
+            rgrip.Part1 = attachtool.Handle
+            rgrip.C0 = CFrame.new(0, -99, 0) * CFrame.Angles(math.rad(0),0,0)
+            rgrip.C1 = attachtool.Grip
+            rgrip.Parent = rarm
+            
+            wait()
+            
+            firetouchinterest(attachtool.Handle, SavedTarget,0)
+            firetouchinterest(attachtool.Handle, SavedTarget,1)
+            
+            wait(0.1)
+            
+            if isr6() then
+                game:GetService("Players").LocalPlayer.Character['Right Arm'].RightGrip:Destroy()
+            else
+                game:GetService("Players").LocalPlayer.Character['RightHand'].RightGrip:Destroy()
+            end
+            
         	closemenu()
         end)
 
