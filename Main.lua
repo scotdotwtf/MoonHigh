@@ -1,5 +1,5 @@
 --// unimportant vars
-ver = "build: alpha v0.01 rewrite"
+ver = "build: alpha v0.01b rewrite"
 messages = {"random message lol - rawr!","random message lol - uwu","random message lol - owo", "random message lol - >w<", "random message lol - okie"}
 
 --// Wait for game to load if someone is using autoexc
@@ -86,6 +86,39 @@ local Player = Players.LocalPlayer
 local Mouse = Player:GetMouse()
 local TargetSelected = false
 local TargetRoot = nil
+local getasset = getsynasset or getcustomasset
+
+makefolder("moonhigh")
+writefile("moonhigh/logo.png", game:HttpGet("https://raw.githubusercontent.com/specowos/MoonHigh/main/Media/moonhigh.png"))
+
+--// watermark
+local logo = Instance.new("ImageLabel")
+logo.Parent = MoonHighRoot
+logo.Name = "logo"
+logo.Image = getasset("moonhigh/logo.png")
+logo.Size = UDim2.new(0, 150, 0, 150)
+logo.Position = UDim2.new(0, 15, 1, -165)
+logo.BackgroundTransparency = 1
+
+--// tween
+local TweenService = game:GetService("TweenService")
+
+local goal1 = {Rotation = 6}
+local goal2 = {Rotation = -6}
+
+local tweenInfo = TweenInfo.new(2, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut)
+
+local tween1 = TweenService:Create(logo, tweenInfo, goal1)
+local tween2 = TweenService:Create(logo, tweenInfo, goal2)
+
+spawn(function()
+	while wait() do
+		tween1:Play()
+		wait(2)
+		tween2:Play()
+		wait(2)
+	end
+end)
 
 --// cursor follow func
 local function checkForPlayer(Part)
@@ -109,7 +142,9 @@ local function mouseMoved()
     if Target then
         if Target.Parent:IsA("Accessory") and checkForPlayer(Target.Parent.Parent) then
             setText(Target.Parent.Parent.Name)
-            SavedTarget = Target.Parent.Parent.HumanoidRootPart
+            pcall(function()
+                SavedTarget = Target.Parent.Parent.HumanoidRootPart
+            end)
             TargetSelected = true
             TargetRoot = Target.Parent.Parent.HumanoidRootPart
             Label.Visible = true
@@ -143,7 +178,7 @@ end
 local function Clicked()
     if TargetSelected and TargetRoot then
         SavedTarget = TargetRoot
-        Player.Character.HumanoidRootPart.CFrame = TargetRoot.CFrame * CFrame.new(0,0,-3) 
+        Player.Character.HumanoidRootPart.CFrame = TargetRoot.CFrame * CFrame.new(0, 0, 3) 
         Notify("Teleported to: "..TargetRoot.Parent.Name)
     end    
 end
@@ -218,17 +253,24 @@ local function OpenMenu()
         Scroll.Selectable = false
         Scroll.Size = UDim2.new(1, 0, 1, -25)
         Scroll.ZIndex = -5
-        Scroll.CanvasSize = UDim2.new(0, 0, 1.7, -5)
-        Scroll.ScrollBarThickness = 0
+        Scroll.CanvasSize = UDim2.new(0, 0, 1.1, 0)
+        Scroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
+        Scroll.ScrollBarThickness = 12
+        Scroll.ScrollBarImageColor3 = Color3.fromRGB(200, 200, 200)
+        Scroll.ScrollBarImageTransparency = 0.5
+        Scroll.TopImage = "rbxasset://textures/ui/Scroll/scroll-middle.png"
+        Scroll.BottomImage = "rbxasset://textures/ui/Scroll/scroll-middle.png"
+        Scroll.BorderSizePixel = 0
         
         List.Name = "list"
         List.Parent = Scroll
-        List.HorizontalAlignment = Enum.HorizontalAlignment.Center
+        List.HorizontalAlignment = Enum.HorizontalAlignment.Left
         List.Padding = UDim.new(0, 4)
         
         Pad.Name = "pad"
         Pad.Parent = Scroll
         Pad.PaddingTop = UDim.new(0, 1)
+        Pad.PaddingLeft = UDim.new(0, 4)
 
         local function makebtn(Text, Func)
             local Button = Instance.new("TextButton")
@@ -245,7 +287,7 @@ local function OpenMenu()
             Button.BackgroundTransparency = 0.250
             Button.Position = UDim2.new(0, 0, 0, 25)
             Button.Selectable = false
-            Button.Size = UDim2.new(1, -10, 0, 20)
+            Button.Size = UDim2.new(1, -16, 0, 24)
             Button.ZIndex = -5
             Button.Font = Enum.Font.RobotoMono
             Button.Text = Text
@@ -374,7 +416,7 @@ local function OpenMenu()
         end
 
         makebtn("Goto", function()
-            Player.Character.HumanoidRootPart.CFrame = SavedTarget.CFrame * CFrame.new(0,0,-3) 
+            Player.Character.HumanoidRootPart.CFrame = SavedTarget.CFrame * CFrame.new(0,0,3) 
         	Notify("Teleporting to: "..SavedTarget.Parent.Name)
         end)
 
@@ -412,6 +454,16 @@ local function OpenMenu()
                 ["AnimR15"] = "None"
             })     
         	Notify("Attaching: "..SavedTarget.Parent.Name)
+        end)
+
+        makebtn("Control", function()
+            GripToPos({
+                ["ToCFrame"] = CFrame.new(0, -1.15, 0) * CFrame.Angles(math.rad(-90),0,0),
+                ["Drop"] = false,
+                ["AnimR6"] = "Tool",
+                ["AnimR15"] = "Tool"
+            })     
+        	Notify("Controling: "..SavedTarget.Parent.Name)
         end)
 
         makebtn("Bodyguard", function()
