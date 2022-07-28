@@ -319,7 +319,7 @@ local function OpenMenu()
         end
 
         local function GripToPos(Info)
-            if #game.Players.LocalPlayer.Backpack:GetChildren() <= 1 and not workspace:FindFirstChild("Handle") then	
+            if #game.Players.LocalPlayer.Backpack:GetChildren() == 0 and not workspace:FindFirstChild("Handle") then	
                 Notify("Not enough tools!")
                 return nil
             end
@@ -329,44 +329,30 @@ local function OpenMenu()
             local backpack = plr.Backpack
             local character = plr.Character
             local hrp = character.HumanoidRootPart
-
+            local targetinstance = character.Humanoid
+            
             local tool = character:FindFirstChildOfClass("Tool") or backpack:FindFirstChildOfClass("Tool")
-            if #game.Players.LocalPlayer.Backpack:GetChildren() < 2 and workspace:FindFirstChild("Handle") then	
-                firetouchinterest(game:GetService("Workspace").Handle,hrp,0)
-                firetouchinterest(game:GetService("Workspace").Handle,hrp,1)
-                character.ChildAdded:wait()
-                task.wait()
-            end
-            for i,v in pairs(character:GetChildren()) do
-                if v:IsA("Tool") then
-                    v.Parent = backpack
-                    v.Parent = character
-                    v.Parent = backpack
-                end
-            end
-
-            local attachtool
-            for i,v in pairs(backpack:GetChildren()) do
-                if v:IsA("Tool") and v ~= tool then
-                    attachtool = v
-                    break
-                end
-            end
-            tool.Parent = backpack
-
-            attachtool.Parent = character
-            attachtool.Parent = tool
-            attachtool.Parent = backpack
-            attachtool.Parent = character.Head
-
             local rarm = character:FindFirstChild("Right Arm") or character:FindFirstChild("RightHand")
-            local rgrip = Instance.new("Weld")
-            rgrip.Name = "RightGrip"
-            rgrip.Part0 = rarm
-            rgrip.Part1 = attachtool.Handle
-            rgrip.C0 = Info.ToCFrame
-            rgrip.C1 = attachtool.Grip
-            rgrip.Parent = rarm
+            
+            local function genrgrip(tool)
+                local rgrip = Instance.new("Weld")
+                rgrip.Name = "RightGrip"
+                rgrip.Part0 = rarm
+                rgrip.Part1 = tool.Handle
+                rgrip.C0 = Info.ToCFrame
+                rgrip.C1 = tool.Grip
+                rgrip.Parent = rarm
+                return rgrip
+            end
+            
+            genrgrip(tool)
+            tool.Parent = backpack
+            tool.Parent = targetinstance
+            tool.Parent = character
+            tool.Handle:BreakJoints()
+            tool.Parent = backpack
+            tool.Parent = targetinstance
+            genrgrip(tool)
 
             wait()
 
@@ -401,8 +387,8 @@ local function OpenMenu()
                 end
             end
 
-            firetouchinterest(attachtool.Handle, SavedTarget,0)
-            firetouchinterest(attachtool.Handle, SavedTarget,1)
+            firetouchinterest(tool.Handle, SavedTarget,0)
+            firetouchinterest(tool.Handle, SavedTarget,1)
 
             wait(0.5)
 
