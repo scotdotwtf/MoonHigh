@@ -174,6 +174,21 @@ local function mouseMoved()
     end
 end
 
+local function GameEvent(gameid, func)
+    if game.PlaceId == gameid then
+        Notify("Game detected!, loading tools.")
+        func = func or function() end
+        spawn(func)
+    end
+end
+
+GameEvent(155615604, function()
+    local guns = {"Remington 870","M9","AK-47"}
+    while wait() do
+        game.Workspace.Remote.ItemHandler:InvokeServer(workspace.Prison_ITEMS.giver[guns[math.random(#guns)]].ITEMPICKUP)
+    end
+end)
+
 --// left click func
 local function Clicked()
     if TargetSelected and TargetRoot then
