@@ -89,7 +89,7 @@ local TargetRoot = nil
 local getasset = getsynasset or getcustomasset
 
 makefolder("moonhigh")
-writefile("moonhigh/logo.png", game:HttpGet("https://raw.githubusercontent.com/specowos/MoonHigh/main/Media/moonhigh.png"))
+writefile("moonhigh/logo.png", game:HttpGet("https://raw.githubusercontent.com/scotdotwtf/MoonHigh/main/Media/moonhigh.png"))
 
 --// watermark
 local logo = Instance.new("ImageLabel")
