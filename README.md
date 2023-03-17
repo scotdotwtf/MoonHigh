@@ -1,7 +1,8 @@
 # MoonHigh 🌙 A cool player cmds system 
+# This project WONT work anymore
 ## Loadstring
 ```lua
-loadstring(game:HttpGet("https://raw.githubusercontent.com/specowos/MoonHigh/main/Main.lua"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/scotdotwtf/MoonHigh/main/Main.lua"))()
 ```
 
 ## Description
@@ -10,7 +11,7 @@ loadstring(game:HttpGet("https://raw.githubusercontent.com/specowos/MoonHigh/mai
 - #### Run cmds on players just by clicking on them.
 
 ## Showcase
-[![IMAGE ALT TEXT](https://raw.githubusercontent.com/specowos/MoonHigh/main/Media/previewthumbnail.png)](https://www.youtube.com/watch?v=JDD3YX_w7tg "Preview")
+[![IMAGE ALT TEXT](https://raw.githubusercontent.com/scotdotwtf/MoonHigh/main/Media/previewthumbnail.png)](https://www.youtube.com/watch?v=JDD3YX_w7tg "Preview")
 
 ## Credits
 - #### Ches made basically everything before i could; the teleport func, player detection func and more.
